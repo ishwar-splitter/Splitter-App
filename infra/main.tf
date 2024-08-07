@@ -5,3 +5,10 @@ module "s3_and_cloudfront" {
   oac_name                     = "splitter_OAC"
   cloudfront_distribution_name = "splitter_distribution"
 }
+
+
+module "cognito" {
+  source = "./cognito"
+  cognito_name = "splitter-user-pool"
+  tags = local.default_tags
+}
