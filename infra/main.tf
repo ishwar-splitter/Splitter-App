@@ -8,7 +8,7 @@ module "s3_and_cloudfront" {
 
 
 module "cognito" {
-  source = "./cognito"
+  source       = "./cognito"
   cognito_name = "splitter-user-pool"
-  tags = local.default_tags
+  tags         = local.default_tags
 }

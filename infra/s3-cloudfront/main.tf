@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "default_frontend" {
   bucket = var.bucket_name
-  tags = var.tags
+  tags   = var.tags
 }
 
 resource "aws_cloudfront_origin_access_control" "default_oac" {
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       values   = ["${aws_cloudfront_distribution.default_distribution.arn}"]
     }
   }
-  
+
 }
 
 resource "aws_s3_bucket_policy" "bucket_policy_attachment" {

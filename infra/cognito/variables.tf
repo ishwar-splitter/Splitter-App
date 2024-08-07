@@ -1,5 +1,5 @@
 variable "cognito_name" {
-  type = string
+  type        = string
   description = "Name of the cognito pool being created"
 }
 
