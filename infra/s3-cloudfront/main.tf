@@ -54,7 +54,7 @@ resource "aws_cloudfront_distribution" "default_distribution" {
 }
 
 
-data "aws_iam_policy_document" "default" {
+data "aws_iam_policy_document" "bucket_policy" {
   statement {
     actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.default_frontend.arn}/*"]
@@ -71,4 +71,9 @@ data "aws_iam_policy_document" "default" {
     }
   }
   
+}
+
+resource "aws_s3_bucket_policy" "bucket_olicy" {
+  bucket = aws_s3_bucket.default_frontend.id
+  policy = data.aws_iam_policy_document.bucket_policy.json
 }
