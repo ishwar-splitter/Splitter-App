@@ -8,5 +8,12 @@ resource "aws_cognito_user_pool" "default" {
     minimum_length = 6
   }
 
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
+
   tags = var.tags
 }
