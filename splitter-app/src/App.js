@@ -1,24 +1,27 @@
-import logo from './logo.svg';
+import React, { useEffect } from 'react'
+import { BrowserRouter,Routes, Route,Navigate  } from 'react-router-dom'
+import Dashboard from './components/Dashboard';
+import AuthForm from './components/AuthForm';
+
 import './App.css';
+import userpool from './userpool';
 
 function App() {
+
+  useEffect(()=>{
+    let user=userpool.getCurrentUser();
+      if(user){
+        <Navigate to="/dashboard" replace />
+      }
+  },[]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<AuthForm />}/>
+        <Route path="/dashboard" element={<Dashboard/>}/>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
