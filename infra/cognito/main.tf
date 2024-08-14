@@ -5,17 +5,28 @@ resource "aws_cognito_user_pool" "default" {
   auto_verified_attributes = ["email"]
 
   password_policy {
-    minimum_length = 6
+    minimum_length = 10
+    temporary_password_validity_days = 3
+    require_uppercase = true
+    require_lowercase = true
+    require_numbers   = true
+    require_symbols   = true
   }
 
   schema {
-    name                     = "foo"
-    attribute_data_type      = "String"
-    mutable                  = false
-    required                 = true
-    developer_only_attribute = false
-    string_attribute_constraints {}
+    attribute_data_type = "String"
+    name                = "name"
+    required            = true
+    mutable             = true
   }
+
+  schema {
+    attribute_data_type = "String"
+    name                = "email"
+    required            = true
+    mutable             = true
+  }
+
 
   verification_message_template {
     default_email_option = "CONFIRM_WITH_CODE"
@@ -42,9 +53,14 @@ resource "aws_cognito_user_pool_client" "client" {
   generate_secret = false
   refresh_token_validity = 90
   prevent_user_existence_errors = "ENABLED"
-  callback_urls = ["https://d1o23vstj4q9h8.cloudfront.net"]
+  callback_urls = ["https://d1tcei8dchb88g.cloudfront.net"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["code", "implicit"]
+  allowed_oauth_scopes                 = ["email", "openid"]
+  supported_identity_providers         = ["COGNITO"]
+
   
-}
+}   
 
 resource "aws_cognito_user_pool_domain" "cognito-domain" {
   domain       = "ishwarkhadka"
