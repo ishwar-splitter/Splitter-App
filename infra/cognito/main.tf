@@ -15,23 +15,22 @@ resource "aws_cognito_user_pool" "default" {
 
   schema {
     attribute_data_type = "String"
-    name                = "name"
+    name                = "email"
     required            = true
     mutable             = true
   }
 
   schema {
     attribute_data_type = "String"
-    name                = "email"
+    name                = "name"
     required            = true
     mutable             = true
   }
 
-
   verification_message_template {
-    default_email_option = "CONFIRM_WITH_CODE"
-    email_subject        = "Account Confirmation"
-    email_message        = "Your confirmation code is {####}"
+    default_email_option  = "CONFIRM_WITH_LINK"
+    email_subject         = "Verify your email for our app"
+    email_message_by_link = "Please click the link below to verify your email address. {##Click Here##}"
   }
 
   account_recovery_setting {
@@ -59,6 +58,11 @@ resource "aws_cognito_user_pool_client" "client" {
   allowed_oauth_scopes                 = ["email", "openid"]
   supported_identity_providers         = ["COGNITO"]
 
+  explicit_auth_flows = [
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_SRP_AUTH"
+  ]
   
 }   
 
