@@ -4,6 +4,7 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 import VerificationMessage from "./VerificationMessage";
+import NotificationModal from "./NotificationModal";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -11,11 +12,23 @@ function AuthForm() {
     const [isLogin, setIsLogin] = useState(true);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+    const [notification, setNotification] = useState(null);
 
     const handleSubmit = async (formData) => {
-        const endpoint = isLogin ? "/login" : "/signup";
+        let endpoint;
+        
+        // Determine the endpoint based on the current state and formData
+        if (isForgotPassword) {
+            endpoint = "/auth/forgotpassword";
+            console.log("Forgot password submission detected");
+        } else if (isLogin) {
+            endpoint = "/auth/login";
+        } else {
+            endpoint = "/auth/signup";
+        }
+
         try {
-            console.log(`Submitting ${isLogin ? 'login' : 'signup'} data:`, formData);
+            console.log(`Submitting ${endpoint} data:`, formData);
             console.log(`API URL: ${API_URL}${endpoint}`);
 
             const response = await fetch(`${API_URL}${endpoint}`, {
@@ -29,47 +42,58 @@ function AuthForm() {
             console.log('Response data:', data);
 
             if (response.ok) {
-                if (!isLogin) {
+                if (isForgotPassword) {
+                    setNotification({ message: "Password reset link sent to your email", type: "success" });
+                    setIsForgotPassword(false);
+                    setIsLogin(true);
+                } else if (!isLogin) {
                     setShowVerificationMessage(true);
                 } else {
-                    alert(data.message || "Login successful");
+                    setNotification({ message: data.message || "Login successful", type: "success" });
                     console.log("Login success", data);
                     // Here you might want to store the user's token or redirect them
                 }
             } else {
-                alert(data.error || "An error occurred");
-                console.error("Login/Signup error", data);
+                setNotification({ message: data.error || "An error occurred", type: "error" });
+                console.error("Request error", data);
             }
         } catch (error) {
             console.error("Fetch error:", error);
-            alert("An error occurred. Please try again later.");
+            setNotification({ message: "An error occurred. Please try again later.", type: "error" });
         }
     };
 
     const renderForm = () => {
-        if (!isLogin && !isForgotPassword && showVerificationMessage) {
+        if (showVerificationMessage) {
             return <VerificationMessage onBackToLogin={() => { setIsLogin(true); setShowVerificationMessage(false); }} />;
         }
-        if (isLogin && !isForgotPassword) {
+        if (isForgotPassword) {
+            return <ForgotPasswordForm onSubmit={handleSubmit} onBackToLogin={() => setIsForgotPassword(false)} />;
+        }
+        if (isLogin) {
             return <LoginForm onSubmit={handleSubmit} onForgotPassword={() => setIsForgotPassword(true)} onSwitchToSignup={() => setIsLogin(false)} />;
         }
-        if (!isLogin && !isForgotPassword) {
-            return <SignupForm onSubmit={handleSubmit} onSwitchToLogin={() => setIsLogin(true)} />;
-        }
-        return <ForgotPasswordForm onBackToLogin={() => setIsForgotPassword(false)} />;
+        return <SignupForm onSubmit={handleSubmit} onSwitchToLogin={() => setIsLogin(true)} />;
     };
 
     return (
         <div className='container'>
             <div className='form-container'>
                 <h1 className="project-title">Splitter App</h1>
-                {!isForgotPassword && (
+                {!isForgotPassword && !showVerificationMessage && (
                     <div className="form-toggle">
                         <button className={isLogin ? "active" : ""} onClick={() => setIsLogin(true)}>Login</button>
                         <button className={!isLogin ? "active" : ""} onClick={() => setIsLogin(false)}>SignUp</button>
                     </div>
                 )}
                 {renderForm()}
+                {notification && (
+                    <NotificationModal
+                        message={notification.message}
+                        type={notification.type}
+                        onClose={() => setNotification(null)}
+                    />
+                )}
             </div>
         </div>
     );
