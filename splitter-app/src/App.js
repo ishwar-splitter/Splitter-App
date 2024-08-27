@@ -1,25 +1,19 @@
-import React, { useEffect } from 'react'
-import { BrowserRouter,Routes, Route,Navigate  } from 'react-router-dom'
-import Dashboard from './components/Dashboard';
+import React from 'react'
+import { BrowserRouter,Routes, Route  } from 'react-router-dom'
 import AuthForm from './components/AuthForm';
+import ExpenseManager from './components/TransactionManager';
 
 import './App.css';
-import userpool from './userpool';
 
 function App() {
 
-  useEffect(()=>{
-    let user=userpool.getCurrentUser();
-      if(user){
-        <Navigate to="/dashboard" replace />
-      }
-  },[]);
+ 
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<AuthForm />}/>
-        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/expenses" element={<ExpenseManager/>}/>
       </Routes>
     </BrowserRouter>
   );
