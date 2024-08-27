@@ -3,10 +3,14 @@ import "./AuthForm.css";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
-import PinInputForm from "./PinInputForm";
 import PasswordChangeForm from "./PasswordChangeForm";
 import VerificationMessage from "./VerificationMessage";
 import NotificationModal from "./NotificationModal";
+import { CognitoUserAttribute, CognitoUser } from "amazon-cognito-identity-js";
+import { userpool} from '../userpool';
+
+
+import { authenticate } from "../services/authenticate";
 
 import { useNavigate } from "react-router-dom";
 
@@ -38,10 +42,9 @@ function AuthForm() {
 
     const handleLogin = async (formData) => {
         try {
-            const data = await handleApiRequest("/auth/login", formData);
+            const data = await authenticate(formData.email, formData.password);
             showNotification(data.message || "Login successful", "success");
             navigate("/expenses");
-
             // Handle successful login (e.g., store token, redirect)
         } catch (error) {
             showNotification(error.message, "error");
@@ -49,46 +52,80 @@ function AuthForm() {
     };
 
     const handleSignup = async (formData) => {
+        const attributeList = [
+            new CognitoUserAttribute({
+                Name: 'email',
+                Value: formData.email,
+            }),
+            new CognitoUserAttribute({
+                Name: 'name',
+                Value: formData.name,
+            })
+        ];
+          
+          
         try {
-            await handleApiRequest("/auth/signup", formData);
-            setFormState('verificationMessage');
+            
+            userpool.signUp(formData.email, formData.password, attributeList, null, (error, result) => {
+                if (error) {
+                    showNotification(error.message, "error");
+                } else {
+                    try{
+                        handleApiRequest("/auth/signup", {
+                            email: formData.email,
+                            name: formData.name,
+                            cognitoId: result.userSub
+                        });
+                        showNotification("Signup successful", "success");
+                        setFormState('verificationMessage');
+                    } catch (error) {
+                        showNotification(error.message, "error");
+                    }
+                    
+                }
+            });
         } catch (error) {
             showNotification(error.message, "error");
         }
     };
 
     const handleForgotPassword = async (formData) => {
-        try {
-            await handleApiRequest("/auth/forgotpassword", formData);
-            setResetData({ ...resetData, email: formData.email });
-            setFormState('pinInput');
-            showNotification("Password reset PIN sent to your email", "success");
-        } catch (error) {
-            showNotification(error.message, "error");
-        }
+       try {
+           const user = new CognitoUser({
+            Username: formData.email,
+            Pool: userpool
+           });
+           user.forgotPassword({
+            onSuccess: (data) => {
+                showNotification("Password reset PIN sent to your email", "success");
+                setResetData({ email: formData.email, pin: '' });
+                setFormState('passwordChange');
+            },
+            onFailure: (error) => {
+                showNotification(error.message, "error");
+            }
+           });
+       } catch (error) {
+        showNotification(error.message, "error");
+       }
     };
 
-    const handlePinVerification = async (pin) => {
-        try {
-            await handleApiRequest("/auth/verifypin", { email: resetData.email, pin });
-            setResetData({ ...resetData, pin });
-            setFormState('passwordChange');
-            showNotification("PIN verified successfully", "success");
-        } catch (error) {
-            showNotification(error.message, "error");
-        }
-    };
 
-    const handlePasswordChange = async (newPassword) => {
+    const handlePasswordChange = async (formData) => {
         try {
-                const resetPayload = {
-                    email: resetData.email,
-                    pin: resetData.pin,
-                    newPassword
-                };
-            await handleApiRequest("/auth/resetpassword", resetPayload);
-            setFormState('login');
-            showNotification("Password changed successfully", "success");
+            const user = new CognitoUser({
+                Username: resetData.email,
+                Pool: userpool
+            });
+            user.confirmPassword(formData.pin, formData.newPassword, {
+                onSuccess: () => {
+                    showNotification("Password changed successfully", "success");
+                    setFormState('login');
+                },
+                onFailure: (error) => {
+                    showNotification(error.message, "error");
+                }
+            });
         } catch (error) {
             showNotification(error.message, "error");
         }
@@ -102,8 +139,6 @@ function AuthForm() {
                 return <SignupForm onSubmit={handleSignup} onSwitchToLogin={() => setFormState('login')} />;
             case 'forgotPassword':
                 return <ForgotPasswordForm onSubmit={handleForgotPassword} onBackToLogin={() => setFormState('login')} />;
-            case 'pinInput':
-                return <PinInputForm onSubmit={handlePinVerification} />;
             case 'passwordChange':
                 return <PasswordChangeForm onSubmit={handlePasswordChange} />;
             case 'verificationMessage':
