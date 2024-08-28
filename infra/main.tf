@@ -12,3 +12,13 @@ module "cognito" {
   cognito_name = "splitter-user-pool"
   tags         = local.default_tags
 }
+
+resource "aws_ecr_repository" "splitter_api" {
+  name                 = "splitter-api"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+  tags = local.default_tags
+}

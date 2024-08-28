@@ -8,10 +8,11 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || `http://localhost:3000`,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
+console.log(process.env.FRONTEND_URL);
 
 app.use(cors(corsOptions));
 
