@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
 import NotificationModal from './NotificationModal';
+import { userpool } from '../userpool';
+import { setUserSession, getUserSession, clearUserSession } from './userSession';
 import './TransactionManager.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api';
@@ -11,59 +13,83 @@ function TransactionManager() {
   const [transactions, setTransactions] = useState([]);
   const [notification, setNotification] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [users, setUsers] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState(getUserSession());
   const navigate = useNavigate();
 
-  // For demo purposes, we're hardcoding the user name
-  // In a real app, you'd get this from your authentication state
-  const userName = "John Doe";
-  const userId = 4;
-
   useEffect(() => {
-    fetchTransactions();
-    fetchUsers();
-  }, []);
+    const user = userpool.getCurrentUser();
+    if (user) {
+      user.getSession((err, session) => {
+        if (err) {
+          navigate('/');
+        } else {
+          const token = session.getIdToken().getJwtToken();
+          fetchUserInfo(token);
+          fetchTransactions(token);
+        }
+      });
+    } else {
+      navigate('/');
+    }
+  }, [navigate]);
 
-  const fetchUsers = async () => {
+  const fetchUserInfo = async (token) => {
     try {
-      const response = await fetch(`${API_URL}/transactions/users`);
-      if (!response.ok) throw new Error('Failed to fetch users');
+      const response = await fetch(`${API_URL}/user`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch user info');
       const data = await response.json();
-      setUsers(data.users);
+      const user = {id: data.id, name: data.name, email: data.email};
+      setLoggedInUser(user);
+      setUserSession(user);
     } catch (error) {
-      showNotification('Error fetching users', 'error');
+      showNotification('Error fetching user info', 'error');
     }
   };
 
-  const fetchTransactions = async () => {
+
+  const fetchTransactions = async (token) => {
     try {
-      console.log('Fetching transactions...');
-      const response = await fetch(`${API_URL}/transactions/usertransactions/${userId}`);
+      const response = await fetch(`${API_URL}/transactions/usertransactions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch transactions');
       const data = await response.json();
-      console.log('Fetched transactions:', data);
-      setTransactions(data.transactions);
-      console.log('Transactions state after setting:', transactions);
+      setTransactions(data.transactions || []);
     } catch (error) {
-      console.error('Error fetching transactions:', error);
       showNotification('Error fetching transactions', 'error');
+      setTransactions([]);
     }
   };
-  
-  useEffect(() => {
-    console.log('Current transactions state:', transactions);
-  }, [transactions]);
 
   const handleAddTransaction = async (newTransaction) => {
+    const user = userpool.getCurrentUser();
+    if (user) {
+      user.getSession((err, session) => {
+        if (err) {
+          showNotification('Error adding transaction', 'error');
+        } else {
+          const token = session.getIdToken().getJwtToken();
+          addTransaction(newTransaction, token);
+        }
+      });
+    }
+  };
+
+  const addTransaction = async (newTransaction, token) => {
     try {
-      const response = await fetch(`${API_URL}/transactions`, {
+      const response = await fetch(`${API_URL}/transactions/addtransaction`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(newTransaction),
       });
       if (!response.ok) throw new Error('Failed to add transaction');
-      showNotification('transaction added successfully', 'success');
-      fetchTransactions();
+      showNotification('Transaction added successfully', 'success');
+      fetchTransactions(token);
     } catch (error) {
       showNotification('Error adding transaction', 'error');
     }
@@ -74,8 +100,11 @@ function TransactionManager() {
   };
 
   const handleLogout = () => {
-    // Implement logout logic here
-    // For now, we'll just redirect to the login page
+    const user = userpool.getCurrentUser();
+    if (user) {
+      user.signOut();
+    }
+    clearUserSession();
     navigate('/');
   };
 
@@ -84,7 +113,9 @@ function TransactionManager() {
       <header className='transaction-manager-header'>
         <h1>Transaction Manager</h1>
         <div className='user-menu'>
-          <button onClick={() => setShowDropdown(!showDropdown)}>{userName} ▼</button>
+          <button onClick={() => setShowDropdown(!showDropdown)}>
+            {loggedInUser.name || 'User'} ▼
+          </button>
           {showDropdown && (
             <div className='dropdown-menu'>
               <button onClick={handleLogout}>Logout</button>
@@ -95,12 +126,14 @@ function TransactionManager() {
       <main className='transaction-manager-content'>
         <div className='transaction-manager-layout'>
           <div className='transaction-form-container'>
-            <TransactionForm onSubmit={handleAddTransaction}
-            users={users.filter(user => user.id !== userId)} 
-            currentUserId={userId} />
+            <TransactionForm 
+              onSubmit={handleAddTransaction}
+            />
           </div>
           <div className='transaction-list-container'>
-            <TransactionList transactions={transactions} />
+            <TransactionList transactions={transactions} 
+            emptyMessage="No transactions added yet. Start by adding a new transaction!"
+            />
           </div>
         </div>
       </main>

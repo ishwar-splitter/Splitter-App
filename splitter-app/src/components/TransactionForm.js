@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import './TransactionManager';
+import { getUserSession } from './userSession';
+import './TransactionManager.css';
 
-function TransactionForm({ onSubmit, users, currentUserId }) {
+function TransactionForm({ onSubmit, currentUserId }) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
-  const [paidBy, setPaidBy] = useState(currentUserId);
+  const [paidBy, setPaidBy] = useState('');
+  const [participants, setParticipants] = useState('');
+  const [type, setType] = useState('');
+
+  const currentUser = getUserSession();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -14,12 +19,17 @@ function TransactionForm({ onSubmit, users, currentUserId }) {
       amount: parseFloat(amount),
       date,
       paid_by: paidBy,
+      participants,
+      added_by: currentUser.id,
+      type
     };
     onSubmit(newTransaction);
     setDescription('');
     setAmount('');
     setDate('');
-    setPaidBy(currentUserId);
+    setPaidBy('');
+    setParticipants('');
+    setType('');
   };
 
   return (
@@ -49,16 +59,32 @@ function TransactionForm({ onSubmit, users, currentUserId }) {
         required
       />
       <select
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+        className="transaction-input"
+        required
+      >
+        <option value="" disabled>Transaction type</option>
+        <option value="expense">Expense</option>
+        <option value="income">Income</option>
+      </select>
+      <input
+        type="text"
         value={paidBy}
         onChange={(e) => setPaidBy(e.target.value)}
+        placeholder="Paid by"
         className="transaction-input"
-      >
-        {users.map((user) => (
-          <option key={user.id} value={user.id}>
-            {user.name}
-          </option>
-        ))}
-      </select>
+        required
+      />
+      <input 
+        type="tel"
+        value={participants}
+        onChange={(e) => setParticipants(e.target.value)}
+        placeholder="Number of Payers"
+        className="transaction-input"
+        min="1"
+        required
+      />
       <button type="submit" className="transaction-submit">Add Transaction</button>
     </form>
   );

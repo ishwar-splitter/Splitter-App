@@ -167,6 +167,17 @@
   background-color: #f8f8f8;
 }
 
+.empty-list-message {
+  text-align: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #6c757d;
+  font-size: 16px;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .searchable-dropdown {
   position: relative;
   width: 100%;

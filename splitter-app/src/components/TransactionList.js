@@ -14,6 +14,19 @@ function TransactionList({ transactions }) {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
 
+  if (transactions.length === 0) {
+    return (
+      <div className="transaction-list">
+        <div className="transaction-list-header">
+          <h2>Transaction List</h2>
+        </div>
+        <div className="empty-list-message">
+          No transactions added yet. Start by adding a new transaction!
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="transaction-list">
       <div className="transaction-list-header">
@@ -30,7 +43,7 @@ function TransactionList({ transactions }) {
             <th>Date</th>
             <th>Type</th>
             <th>Paid By</th>
-            <th>Participants</th>
+            <th>Number of Payers</th>
           </tr>
         </thead>
         <tbody>
@@ -40,7 +53,7 @@ function TransactionList({ transactions }) {
               <td>${transaction.amount}</td>
               <td>{new Date(transaction.date).toLocaleDateString()}</td>
               <td>{transaction.type}</td>
-              <td>{transaction.paid_by_name}</td>
+              <td>{transaction.paid_by}</td>
               <td>{transaction.participants}</td>
             </tr>
           ))}

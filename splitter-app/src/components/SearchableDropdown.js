@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-
+import './TransactionManager.css';
 function SearchableDropdown({ options, value, onChange, placeholder }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -9,13 +9,13 @@ function SearchableDropdown({ options, value, onChange, placeholder }) {
     option.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelect = (optionId) => {
-    onChange(optionId);
+  const handleSelect = (option) => {
+    onChange(option.id);
     setIsOpen(false);
     setSearchTerm('');
   };
 
-  const selectedOption = options.find(option => option.id.toString() === value);
+  const selectedOption = options.find(option => option.id === value);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -48,7 +48,7 @@ function SearchableDropdown({ options, value, onChange, placeholder }) {
             <div
               key={option.id}
               className="dropdown-item"
-              onClick={() => handleSelect(option.id.toString())}
+              onClick={() => handleSelect(option)}
             >
               {option.name}
             </div>
