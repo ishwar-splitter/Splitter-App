@@ -50,7 +50,7 @@ function TransactionList({ transactions }) {
           {sortedTransactions.map((transaction) => (
             <tr key={transaction.id} className="transaction-item">
               <td>{transaction.description}</td>
-              <td>${transaction.amount}</td>
+              <td>Rs.{transaction.amount}</td>
               <td>{new Date(transaction.date).toLocaleDateString()}</td>
               <td>{transaction.type}</td>
               <td>{transaction.paid_by}</td>

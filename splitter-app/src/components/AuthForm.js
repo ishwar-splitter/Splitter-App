@@ -14,7 +14,7 @@ import { authenticate } from "../services/authenticate";
 
 import { useNavigate } from "react-router-dom";
 
-const API_URL = process.env.REACT_APP_API_URL || `http://localhost:4000/api`;
+const API_URL = process.env.REACT_APP_API_URL || `http://backend:4000/api`;
 
 function AuthForm() {
     const navigate = useNavigate();

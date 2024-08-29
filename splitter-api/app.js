@@ -8,11 +8,11 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || `http://localhost:3000`,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  origin: ['http://localhost:3000', 'https://splitter_frontend:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-};
-console.log(process.env.FRONTEND_URL);
+}
 
 app.use(cors(corsOptions));
 
