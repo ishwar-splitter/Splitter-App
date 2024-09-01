@@ -67,3 +67,10 @@ resource "aws_db_instance" "splitter_db" {
   copy_tags_to_snapshot = true
   tags = local.default_tags
 }
+
+module "ecs_cluster" {
+  source = "./ECS"
+  cluster_name = "ishwar-splitter-api-cluster"
+  tags = local.default_tags
+
+}
