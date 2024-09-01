@@ -9,7 +9,7 @@ exports.signup = async (req, res) => {
     // Create user in database
     await createUser({ email, name, cognitoId });
 
-    res.json({ message: 'User registered successfully', userSub: data.UserSub });
+    res.json({ message: 'User registered successfully', cognitoId});
   } catch (error) {
     console.log(error);
     res.status(400).json({ error: error.message });

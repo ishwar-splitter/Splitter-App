@@ -55,14 +55,14 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat.id
-  subnet_id    = aws_subnet.public[0].id // Use the first public subnet for NAT Gateway
+  subnet_id    = aws_subnet.public.id 
   tags = {
     Name = "${var.vpc_name}-nat-gateway"
   }
 }
 
 resource "aws_eip" "nat" {
-  vpc = true
+  domain = aws_vpc.this
 }
 
 resource "aws_route_table" "private" {

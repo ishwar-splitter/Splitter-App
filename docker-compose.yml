@@ -20,6 +20,8 @@ services:
       context: ./splitter-api
       dockerfile: Dockerfile
     container_name: splitter_backend
+    volumes:
+      - ~/.aws:/root/.aws:ro
     ports:
       - "4000:4000"
     env_file:
@@ -35,9 +37,12 @@ services:
     container_name: splitter_db
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./splitter-api/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./splitter-api/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s

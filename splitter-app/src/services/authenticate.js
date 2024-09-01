@@ -15,6 +15,7 @@ export const authenticate = async (email, password) => {
 
         user.authenticateUser(authenticationDetails, {
             onSuccess: (result) => {
+                console.log("trying authentication");
                 console.log("User authenticated successfully:", result);
                 const userAttributes = result.getIdToken().payload;
                 const userData = {
@@ -26,6 +27,8 @@ export const authenticate = async (email, password) => {
                 resolve(result);
             },
             onFailure: (err) => {
+                console.log("couldn't login");
+                console.log(err);
                 console.error("User authentication failed:", err);
                 reject(err);
             },

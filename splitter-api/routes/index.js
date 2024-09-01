@@ -4,7 +4,6 @@ const authRoutes = require('./auth');
 const transactionRoutes = require('./transactions');
 const verifyToken = require('../middlewares/verifyToken');
 const userController = require('../controllers/userController');
-const { pool } = require('../config/db');
 
 router.use('/auth', authRoutes);
 router.use('/transactions', transactionRoutes);

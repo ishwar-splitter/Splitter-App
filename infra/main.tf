@@ -13,17 +13,17 @@ module "cognito" {
   tags         = local.default_tags
 }
 
-module "vpc" {
-  source = "./VPC"
+# module "vpc" {
+#   source = "./VPC"
 
-  vpc_cidr              = "10.0.0.0/16"
-  vpc_name              = "splitter-vpc"
-  public_subnet_cidrs   = ["10.0.1.0/24", "10.0.2.0/24"]
-  private_subnet_cidrs  = ["10.0.3.0/24", "10.0.4.0/24"]
-  public_subnet_count    = 2
-  private_subnet_count   = 2
-  availability_zones     = ["us-east-1a", "us-east-1b"]
-}
+#   vpc_cidr              = "10.0.0.0/16"
+#   vpc_name              = "splitter-vpc"
+#   public_subnet_cidrs   = ["10.0.1.0/24", "10.0.2.0/24"]
+#   private_subnet_cidrs  = ["10.0.3.0/24", "10.0.4.0/24"]
+#   public_subnet_count    = 2
+#   private_subnet_count   = 2
+#   availability_zones     = ["us-east-1a", "us-east-1b"]
+# }
 
 resource "aws_ecr_repository" "splitter_api" {
   name                 = "splitter-api"
@@ -32,5 +32,12 @@ resource "aws_ecr_repository" "splitter_api" {
   image_scanning_configuration {
     scan_on_push = true
   }
+  tags = local.default_tags
+}
+
+resource "aws_secretsmanager_secret" "splitter_secret" {
+  name = "ishwar-splitter-secret"
+  description = "Splitter API secrets"
+  recovery_window_in_days = 0
   tags = local.default_tags
 }

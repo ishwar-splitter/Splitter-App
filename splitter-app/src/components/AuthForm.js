@@ -43,6 +43,7 @@ function AuthForm() {
     const handleLogin = async (formData) => {
         try {
             const data = await authenticate(formData.email, formData.password);
+            console.log(data);
             showNotification(data.message || "Login successful", "success");
             navigate("/expenses");
             // Handle successful login (e.g., store token, redirect)
