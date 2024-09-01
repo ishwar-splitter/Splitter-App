@@ -45,3 +45,25 @@ resource "aws_secretsmanager_secret" "splitter_secret" {
   recovery_window_in_days = 0
   tags = local.default_tags
 }
+
+resource "aws_db_instance" "splitter_db" {
+  allocated_storage = 20
+  instance_class = "db.t3.small"
+  auto_minor_version_upgrade = false
+  availability_zone = "us-east-1b"
+  db_name = "expense_splitter"
+  db_subnet_group_name = "ishwar-splitter-vpc"
+  deletion_protection = true
+  engine = "mysql"
+  engine_version = "8.0.39"
+  identifier = "ishwar-splitter-db"
+  max_allocated_storage = 200
+  multi_az = false
+  skip_final_snapshot = true
+  storage_encrypted = true
+  storage_throughput = 0
+  storage_type = "gp2"
+  username = "Splitter_dev"
+  copy_tags_to_snapshot = true
+  tags = local.default_tags
+}
