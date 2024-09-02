@@ -71,6 +71,36 @@ resource "aws_db_instance" "splitter_db" {
 module "ecs_cluster" {
   source = "./ECS"
   cluster_name = "ishwar-splitter-api-cluster"
+
+  task_family = "ishwar-splitter-api-taskdef"
+  cpu = "512"
+  memory = "2048"
+  container_name = "ishwar-splitter-api"
+  ecr_repository_url = "949263681218.dkr.ecr.us-east-1.amazonaws.com/splitter-api"
+  image_tag = ""
+  container_port = 4000
   tags = local.default_tags
 
+}
+
+resource "aws_lb_target_group" "splitter_api_tg" {
+  name     = "ishwar-splitter-api-tg"
+  port = 80
+  protocol = "HTTP"
+  vpc_id = module.vpc.vpc_id
+  target_type = "ip"
+  protocol_version = "HTTP1"
+  tags = local.default_tags
+
+  health_check {
+    enabled = true
+    healthy_threshold = 5
+    interval = 30
+    matcher = "200"
+    path = "/"
+    port = "traffic-port"
+    protocol = "HTTP"
+    timeout = 5
+    unhealthy_threshold = 2
+  }
 }
