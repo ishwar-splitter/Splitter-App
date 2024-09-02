@@ -68,6 +68,29 @@ resource "aws_db_instance" "splitter_db" {
   tags = local.default_tags
 }
 
+resource "aws_security_group" "ecs_service_sg" {
+  name        = "ishwar-ecs-service-sg"
+  description = "Security group for the ECS service"
+  vpc_id      = module.vpc.vpc_id  
+  ingress {
+    description      = "Allow inbound traffic from ALB"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.splitter_api_lb_sg.id]  
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = local.default_tags
+}
+
 module "ecs_cluster" {
   source = "./ECS"
   cluster_name = "ishwar-splitter-api-cluster"
@@ -79,6 +102,14 @@ module "ecs_cluster" {
   ecr_repository_url = "949263681218.dkr.ecr.us-east-1.amazonaws.com/splitter-api"
   image_tag = ""
   container_port = 4000
+
+  service_name = "ishwar-splitter-api-svc"
+  target_group_arn = aws_lb_target_group.splitter_api_tg.arn
+  desired_count = 2
+  subnets = [module.vpc.private_subnets[0], module.vpc.private_subnets[1]]
+  security_groups = [aws_security_group.ecs_service_sg.id]
+
+
   tags = local.default_tags
 
 }

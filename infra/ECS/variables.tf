@@ -30,35 +30,27 @@ variable "container_port" {
   description = "The port on which the container listens"
 }
 
-# variable "service_name" {
-#   description = "The name of the ECS service"
-# }
+variable "service_name" {
+  description = "The name of the ECS service"
+}
 
-# variable "desired_count" {
-#   description = "The desired number of task instances"
-# }
+variable "desired_count" {
+  description = "The desired number of task instances"
+}
 
-# variable "subnets" {
-#   description = "The subnets for the ECS service"
-#   type        = list(string)
-# }
+variable "subnets" {
+  description = "The subnets for the ECS service"
+  type        = list(string)
+}
 
-# variable "security_groups" {
-#   description = "The security groups for the ECS service"
-#   type        = list(string)
-# }
+variable "security_groups" {
+  description = "The security groups for the ECS service"
+  type        = list(string)
+}
 
-# variable "database_url" {
-#   description = "The database connection URL"
-# }
-
-# variable "other_env_var" {
-#   description = "Other environment variables for the container"
-# }
-
-# variable "target_group_arn" {
-#   description = "The ARN of the target group for the load balancer"
-# }
+variable "target_group_arn" {
+  description = "The ARN of the target group for the load balancer"
+}
 
 variable "tags" {
   type = map(any)
