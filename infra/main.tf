@@ -104,3 +104,72 @@ resource "aws_lb_target_group" "splitter_api_tg" {
     unhealthy_threshold = 2
   }
 }
+
+resource "aws_lb" "splitter_api_lb" {
+  name               = "ishwar-splitter-api-alb"
+  internal           = false
+  load_balancer_type = "application"
+  subnet_mapping {
+    subnet_id = module.vpc.public_subnets[0]
+  }
+  subnet_mapping {
+    subnet_id = module.vpc.public_subnets[1]
+  }
+  security_groups = [aws_security_group.splitter_api_lb_sg.id]
+  
+  tags = local.default_tags
+
+}
+
+resource "aws_security_group" "splitter_api_lb_sg" {
+  name        = "alb-sg"
+  description = "Security group for the ALB"
+  vpc_id      = module.vpc.vpc_id 
+
+  ingress {
+    description = "Allow HTTP traffic"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "ishwar-splitter-api-alb-sg"
+  }
+}
+
+resource "aws_lb_listener" "http_listener" {
+  load_balancer_arn = aws_lb.splitter_api_lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.splitter_api_tg.arn
+  }
+}
+
+
+resource "aws_lb_listener_rule" "example" {
+  listener_arn = aws_lb_listener.http_listener.arn
+  priority     = 1
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.splitter_api_tg.arn
+  }
+
+  condition {
+    
+  }
+
+}
