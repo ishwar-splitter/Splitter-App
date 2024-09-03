@@ -51,18 +51,18 @@ jobs:
       
       - name: Build, tag, and push docker image to Amazon ECR
         run: |
-          sudo docker build -t $IMAGE_NAME:latest ./splitter-api
-          sudo docker push $IMAGE_NAME:latest
+          docker build -t $IMAGE_NAME:latest ./splitter-api
+          docker push $IMAGE_NAME:latest
       
       - name: Update ECS task deployment
         run: | 
-          aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_REGION
+          aws ecs update-service --cluster "$ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_REGION
 
   build-app:
     runs-on: ubuntu-latest
     env:
       BUCKET_NAME: ${{ vars.BUCKET_NAME }}
-
+      ENV : ${{ vars.ENV_DEV }}
     permissions:
       id-token: write
       contents: read
@@ -81,11 +81,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Set environment variables
-        run: |
-          export VAR_NAME=$(printf "ENV_%s" $GITHUB_REF_NAME)
-          echo "ENV=${!VAR_NAME}" >> $GITHUB_ENV
 
       - name: Build and deploy app
         run: |

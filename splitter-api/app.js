@@ -17,7 +17,7 @@ fetchAndSetSecrets(secretName)
 
     const corsOptions = {
       credentials: true,
-      origin: [process.env.FRONTEND_URL, "https://d3cfcq5sb3khlq.cloudfront.net"],
+      origin: [process.env.FRONTEND_URL, "https://ishwar.dev.bibek65.tech"],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
       allowedHeaders: ["Content-Type", "Authorization"],
     };
