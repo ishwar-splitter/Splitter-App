@@ -1,6 +1,7 @@
 locals {
   default_tags = {
-    project   = "ishwar-splitter"
+    name = "ishwar-splitter"
+    project   = "training"
     creator   = "ishwarkhadka@lftechnology.com"
     deletable = "Yes"
   }

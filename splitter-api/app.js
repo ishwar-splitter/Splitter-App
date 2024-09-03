@@ -1,22 +1,36 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const routes = require('./routes');
-const { testConnection } = require('./config/db');
-const app = express();
+require("dotenv").config();
 
-app.use(express.json());
+const { fetchAndSetSecrets } = require("./fetchSecrets");
 
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
+const secretName = "ishwar-splitter-secret";
 
-app.use(cors(corsOptions));
+fetchAndSetSecrets(secretName)
+  .then(() => {
+    console.log(process.env);
 
-app.use('/api', routes);
+    const express = require("express");
+    const app = express();
+    const cors = require("cors");
+    const routes = require("./routes");
 
-testConnection();
+    app.use(express.json());
 
-module.exports = app;
+    const corsOptions = {
+      credentials: true,
+      origin: [process.env.FRONTEND_URL, "https://d3cfcq5sb3khlq.cloudfront.net"],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    };
+
+    app.use(cors(corsOptions));
+
+    app.use("/api", routes);
+
+    const port = process.env.PORT || 4000; // Set a default port if PORT is not in environment variables
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Error fetching and setting secrets:", error);
+  });

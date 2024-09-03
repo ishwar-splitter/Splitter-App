@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model transactions {
+  id           Int      @id @default(autoincrement())
+  description  String   @db.VarChar(255)
+  amount       Decimal  @db.Decimal(10, 2)
+  date         DateTime @db.Date
+  type         String   @db.Char(7)
+  paid_by      String   @db.Char(36)
+  participants Int
+  added_by     String   @db.Char(50)
+  users        users    @relation(fields: [added_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_ibfk_1")
+
+  @@index([added_by], map: "added_by")
+}
+
+model users {
+  id           String         @id @db.Char(50)
+  email        String         @unique(map: "email") @db.VarChar(255)
+  name         String         @db.VarChar(255)
+  transactions transactions[]
+}

@@ -179,3 +179,5 @@ vyaguta-global-application.pem
 /**/**/.terraform/
 
 temp_secrets/
+
+splitter-api/migrations/init.sql

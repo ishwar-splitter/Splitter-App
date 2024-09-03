@@ -1,7 +1,7 @@
-const { getUserTransactions, getUsers } = require('../models/userModel');
+const { getUserTransactions, getUsers, addTransaction } = require('../models/userModel');
 
 exports.getUserTransactions = async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.user.sub;
   
     try {
       const transactions = await getUserTransactions(userId);
@@ -22,3 +22,13 @@ exports.getUserTransactions = async (req, res) => {
     }
   };
 
+  exports.addTransaction = async (req, res) => {
+    const transaction = req.body;
+    try {
+      await addTransaction(transaction);
+      res.json({ message: 'Transaction added successfully' });
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      res.status(500).json({ error: 'An error occurred while adding the transaction' });
+    }
+  };

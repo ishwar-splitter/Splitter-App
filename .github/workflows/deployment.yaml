@@ -1,0 +1,84 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - dev
+      - qa
+      - uat
+      - master
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Environment to deploy to"
+        required: true
+        options:
+          - "dev"
+          - "qa"
+          - "uat"
+          - "prod"
+          - "test"
+
+jobs:
+  build-server-dev:
+    runs-on: ubuntu-lastet
+
+    env:
+      IMAGE_NAME: ${{ vars.IMAGE_REPO_URL }}/${{ vars.IMAGE }}
+      AWS_REGION: "us-east-1"
+      ECS_SERVICE_NAME: $${{ vars.ECS_SERVICE_NAME }}
+      ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::949263681218:role/ishwar-github-oidc
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Build, tag, and push docker image to Amazon ECR
+        run: |
+          sudo docker build -t $IMAGE_NAME:latest ./splitter-api
+          sudo docker push $IMAGE_NAME:latest
+      
+      - name: Update ECS task deployment
+        run: | 
+          aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_REGION
+
+  build-app:
+    runs-on: ubuntu-latest
+    env:
+      BUCKET_NAME: ${{ vars.BUCKET_NAME }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::949263681218:role/ishwar-github-oidc
+          aws-region: us-east-1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Set environment variables
+        run: |
+          export VAR_NAME=$(printf "ENV_%s" $GITHUB_REF_NAME)
+          echo "ENV=${!VAR_NAME}" >> $GITHUB_ENV
+
+      - name: Build and deploy app
+        run: |
+          ./scripts/frontendDeployer.sh

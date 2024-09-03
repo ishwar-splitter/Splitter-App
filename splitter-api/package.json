@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node app.js",
+    "migrate": "node migrate.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.1674.0",
+    "@prisma/client": "^5.19.0",
+    "aws-sdk": "^2.1686.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -18,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
     "jwks-rsa": "^3.1.0",
-    "mysql2": "^3.11.0"
+    "mysql2": "^3.11.0",
+    "prisma": "^5.19.0"
   },
   "description": ""
 }

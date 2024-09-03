@@ -1,57 +1,86 @@
-const { pool } = require('../config/db');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 const createUser = async (userData) => {
-  const { email, name, cognitoId } = userData;
-  const query = 'INSERT INTO users (email, name, cognito_id) VALUES (?, ?, ?)';
+  if (!prisma) {
+    throw new Error('Prisma client is not initialized');
+  }
+  const { cognitoId, email, name } = userData;
   
   try {
-    const [result] = await pool.execute(query, [email, name, cognitoId]);
-    return result.insertId;
+    const result = await prisma.users.create({
+      data : {
+        id: cognitoId,
+        email: email,
+        name: name
+      },
+      
+    });
+    return result;
   } catch (error) {
     console.error('Error creating user in database:', error);
     throw error;
   }
 };
 
-const getUsers = async () => {
-  const query = 'SELECT * FROM users';
+const getCurrentUser = async (cognitoId) => {
   try {
-    const [rows] = await pool.execute(query);
-    return rows;
+    const user = await prisma.users.findUnique({
+      where: {
+        id: cognitoId
+      }
+    });
+    return user;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Error fetching current user:', error);
     throw error;
   }
 };
 
 const getUserTransactions = async (userId) => {
-  const query = `
-    SELECT t.id, t.description, t.amount, t.date, t.type, t.paid_by, t.participants,
-           u.name as paid_by_name, t.added_by
-    FROM transactions t
-    JOIN users u ON t.paid_by = u.id
-    WHERE t.added_by = ?
-    ORDER BY t.date DESC
-  `;
-
   try {
-    const [rows] = await pool.execute(query, [userId]);
-    return rows.map(row => ({
-      ...row,
-      isPersonal: row.paid_by === userId,
-      amountOwed: row.type === 'expense' && row.paid_by !== userId 
-        ? (row.amount / row.participants).toFixed(2) 
-        : '0.00'
-    }));
+    const transactions = await prisma.transactions.findMany({
+      where: { added_by: userId },
+      include: {
+        users: {
+          select: { name: true }
+        }
+      },
+      orderBy: { date: 'desc' }
+    });
+
+    return transactions;
   } catch (error) {
     console.error('Error fetching user transactions:', error);
     throw error;
   }
 };
 
+const addTransaction = async (transaction) => {
+  const { description, amount, date, type, paid_by, participants, added_by } = transaction;
+  try {
+    const result = await prisma.transactions.create({
+      data: {
+        description: description,
+        amount: amount,
+        date: new Date(date),
+        type: type,
+        paid_by: paid_by,
+        participants: parseInt(participants),
+        added_by: added_by
+      }
+    });
+    return result;
+  } catch (error) {
+    console.error('Error adding transaction:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   createUser,
+  getCurrentUser,
   getUserTransactions,
-  getUsers,
+  addTransaction,
   
 };
