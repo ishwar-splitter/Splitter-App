@@ -38,7 +38,7 @@ function ForgotPasswordForm({ onSubmit, onBackToLogin, onResetPassword }) {
             {error && <p className="error-message">{error}</p>}
             <button type="submit">Reset Password</button>
             <div className="back-to-login">
-                <a href="#" onClick={onBackToLogin}>Back to Login</a>
+                <a onClick={onBackToLogin}>Back to Login</a>
             </div>
         </form>
     );
