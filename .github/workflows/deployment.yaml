@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BUCKET_NAME: ${{ vars.BUCKET_NAME }}
-
+      ENV : ${{ vars.ENV_DEV }}
     permissions:
       id-token: write
       contents: read
@@ -81,11 +81,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Set environment variables
-        run: |
-          export VAR_NAME=$(printf "ENV_%s" $GITHUB_REF_NAME)
-          echo "ENV=${!VAR_NAME}" >> $GITHUB_ENV
 
       - name: Build and deploy app
         run: |
