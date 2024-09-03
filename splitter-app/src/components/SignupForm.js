@@ -17,7 +17,7 @@ function SignupForm({ onSubmit, onSwitchToLogin }) {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
             <button>Signup</button>
-            <p>Already a Member? <a onClick={(e) => { e.preventDefault(); onSwitchToLogin(); }}>Login Here!</a></p>
+            <p>Already a Member? <a href="" onClick={(e) => { e.preventDefault(); onSwitchToLogin(); }}>Login Here!</a></p>
         </form>
     );
 }
