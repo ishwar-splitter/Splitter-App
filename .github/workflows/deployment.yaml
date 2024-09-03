@@ -30,6 +30,10 @@ jobs:
       AWS_REGION: "us-east-1"
       ECS_SERVICE_NAME: $${{ vars.ECS_SERVICE_NAME }}
       ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+    
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -59,6 +63,10 @@ jobs:
     env:
       BUCKET_NAME: ${{ vars.BUCKET_NAME }}
 
+    permissions:
+      id-token: write
+      contents: read
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
