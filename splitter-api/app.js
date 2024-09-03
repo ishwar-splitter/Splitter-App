@@ -17,7 +17,7 @@ fetchAndSetSecrets(secretName)
 
     const corsOptions = {
       credentials: true,
-      origin: ["http://localhost:3000", "https://splitter_frontend:3000"],
+      origin: [process.env.FRONTEND_URL, "https://d3cfcq5sb3khlq.cloudfront.net"],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
       allowedHeaders: ["Content-Type", "Authorization"],
     };

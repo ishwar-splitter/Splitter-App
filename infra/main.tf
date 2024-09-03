@@ -96,16 +96,16 @@ module "ecs_cluster" {
   cluster_name = "ishwar-splitter-api-cluster"
 
   task_family = "ishwar-splitter-api-taskdef"
-  cpu = "512"
+  cpu = "1024"
   memory = "2048"
   container_name = "ishwar-splitter-api"
   ecr_repository_url = "949263681218.dkr.ecr.us-east-1.amazonaws.com/splitter-api"
-  image_tag = ""
+  image_tag = "latest"
   container_port = 4000
 
   service_name = "ishwar-splitter-api-svc"
   target_group_arn = aws_lb_target_group.splitter_api_tg.arn
-  desired_count = 2
+  desired_count = 1
   subnets = [module.vpc.private_subnets[0], module.vpc.private_subnets[1]]
   security_groups = [aws_security_group.ecs_service_sg.id]
 
@@ -140,12 +140,7 @@ resource "aws_lb" "splitter_api_lb" {
   name               = "ishwar-splitter-api-alb"
   internal           = false
   load_balancer_type = "application"
-  subnet_mapping {
-    subnet_id = module.vpc.public_subnets[0]
-  }
-  subnet_mapping {
-    subnet_id = module.vpc.public_subnets[1]
-  }
+  subnets = [module.vpc.public_subnets[0], module.vpc.public_subnets[1]]
   security_groups = [aws_security_group.splitter_api_lb_sg.id]
   
   tags = local.default_tags
@@ -173,9 +168,7 @@ resource "aws_security_group" "splitter_api_lb_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "ishwar-splitter-api-alb-sg"
-  }
+  tags = local.default_tags
 }
 
 resource "aws_lb_listener" "http_listener" {
@@ -187,20 +180,5 @@ resource "aws_lb_listener" "http_listener" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.splitter_api_tg.arn
   }
-}
-
-
-resource "aws_lb_listener_rule" "example" {
-  listener_arn = aws_lb_listener.http_listener.arn
-  priority     = 1
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.splitter_api_tg.arn
-  }
-
-  condition {
-    
-  }
-
+  tags = local.default_tags
 }
