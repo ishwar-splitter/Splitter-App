@@ -22,8 +22,8 @@ on:
           - "test"
 
 jobs:
-  build-server-dev:
-    runs-on: ubuntu-lastet
+  build-server:
+    runs-on: ubuntu-latest
 
     env:
       IMAGE_NAME: ${{ vars.IMAGE_REPO_URL }}/${{ vars.IMAGE }}
