@@ -51,8 +51,8 @@ jobs:
       
       - name: Build, tag, and push docker image to Amazon ECR
         run: |
-          sudo docker build -t $IMAGE_NAME:latest ./splitter-api
-          sudo docker push $IMAGE_NAME:latest
+          docker build -t $IMAGE_NAME:latest ./splitter-api
+          docker push $IMAGE_NAME:latest
       
       - name: Update ECS task deployment
         run: | 
