@@ -3,6 +3,7 @@ set -eux
 
 cd splitter-app
 echo $ENV | base64 --decode > .env
+cat .env
 npm install
 npx eslint . || echo "ESLint completed with warnings"
 CI=false npm run build
