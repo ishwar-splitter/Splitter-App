@@ -28,7 +28,7 @@ jobs:
     env:
       IMAGE_NAME: ${{ vars.IMAGE_REPO_URL }}/${{ vars.IMAGE }}
       AWS_REGION: "us-east-1"
-      ECS_SERVICE_NAME: $${{ vars.ECS_SERVICE_NAME }}
+      ECS_SERVICE_NAME: ${{ vars.ECS_SERVICE_NAME }}
       ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
     
     permissions:
